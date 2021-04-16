@@ -1,4 +1,6 @@
 const fs = require("fs");
+const path = require("path");
+const request = require("request");
 
 module.exports = {
   writeFile(path, buffer, callback) {
@@ -11,4 +13,35 @@ module.exports = {
       });
     });
   },
+  /**
+   * 下载单张图片
+   * @param {*} src 网络地址
+   * @param {*} dest 本地地址
+   * @param {*} callback 
+   */
+  downloadImage(src, dest, callback) {
+    const path = dest.substring(0, dest.lastIndexOf('/'));
+    if(!fs.existsSync(path)){
+      mkdirSync(path);
+    }
+    request.head(src, (err, res, body) => {
+      if (err) { console.log(err); return }
+      src && request(src).pipe(fs.createWriteStream(dest)).on('close', () => {
+        callback && callback(null, dest)
+      });
+    });
+  }
 };
+
+//递归创建目录 同步方法  
+function mkdirSync(dirname) {  
+  //console.log(dirname);  
+  if (fs.existsSync(dirname)) {  
+      return true;  
+  } else {  
+      if (mkdirSync(path.dirname(dirname))) {  
+          fs.mkdirSync(dirname);  
+          return true;  
+      }  
+  }  
+}

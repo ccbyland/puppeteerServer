@@ -4,6 +4,14 @@ module.exports = {
 
   // 爬虫服务
   crawlerServer: {
+    sex8: {
+      // 是否显示chrome可视化窗口
+      isHeadless: true,
+      // 过滤关键字
+      filterTags: ['服务', '应用'],
+      // 目标一级页面
+      url: "https://www.cnblogs.com/"
+    },
     live: {
       // 是否显示chrome可视化窗口
       isHeadless: true,
