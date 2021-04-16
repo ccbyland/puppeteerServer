@@ -22,6 +22,7 @@ const {
   url,
   isHeadless
 } = crawlerServer.sex8;
+const dataArray = [];
 let currentListPageUrl = url;
 let pageIndex = 1;
 /**
@@ -31,21 +32,37 @@ async function getAmbient() {
   const _start_time = Date.now();
   log(`==创建浏览器和页面对象环境== Start...`);
   const browser = await puppeteer.launch({
-    devtools: true, //是否显示调试工具
+    devtools: false, //是否显示调试工具
     headless: !isHeadless, // 是否显示chrome可视化窗口
     defaultViewport: {
-      width: 1500,
+      width: 2000,
       height: 800,
     },
   });
   const page = await browser.newPage();
-
-  await page.goto(currentListPageUrl);
+  await page.goto(currentListPageUrl, {
+    timeout: 0
+  });
   log(`==创建浏览器和页面对象环境== End... 耗时：${(Date.now() - _start_time) / 1000}秒`);
   return {
     browser,
     page
   };
+}
+/**
+ * 登陆
+ * @param {*} page 
+ */
+async function login(page) {
+  const _start_time = Date.now();
+  log(`==准备登陆== Start...`);
+  //登录
+  await page.type('#ls_username', "cc_byland");
+  await page.type('#ls_password', 'byland99');
+  await page.click('a.close_index');
+  await page.click('.fastlg_l button');
+  await page.waitForNavigation();
+  log(`==登陆成功== End... 耗时：${(Date.now() - _start_time) / 1000}秒`);
 }
 /**
  * 获取数据列表
@@ -56,15 +73,13 @@ async function getDataList(page) {
   log(`==获取数据列表== Start...`);
   const content = await page.content();
   const $ = cheerio.load(content);
-  const list = await $("#post_list").find(".post-item");
-
+  const list = await $("#threadlist").find("tbody");
   const _list = [];
   list.map((index, item) => {
     let $item = $(item);
-    let title = $item.find(".post-item-title");
+    let title = $item.find("a.xst");
     let text = title.text();
-    let href = title.attr("href");
-
+    let href = 'https://www.sex8.cc/' + title.attr("href");
     const flag = filterTags.find(tag => {
       return text.indexOf(tag) != -1;
     });
@@ -75,55 +90,73 @@ async function getDataList(page) {
   });
   log(`---------共拉取直播列表共${_list.length}条数据---------`);
   log(`==获取数据列表== End... 耗时：${(Date.now() - _start_time) / 1000}秒`);
-  return _list;
+  // 详情数据
+  await getDataByDetail(page, _list);
 }
-/**s
+/**
  * 获取数据详情
  * @param {*} page
- * @param {*} datalist
+ * @param {*} list
  */
-async function getDataByDetail(page, datalist) {
+async function getDataByDetail(page, list) {
   const _start_time = Date.now();
   log(`==获取数据详情== Start...`);
   let i = 0;
-  while (i < datalist.length) {
-    const obj = datalist[i];
+  const _array = [];
+  while (i < list.length) {
+    const obj = list[i];
     log(`---------详情【${obj.text}】读取中---------`);
-    await page.goto(`${obj.href}`);
+    await page.goto(`${obj.href}`, {
+      timeout: 0
+    });
     const content = await page.content();
     const $ = cheerio.load(content);
-    const text = await $("#cb_post_title_url").text();
-    const imgs = await $("#cnblogs_post_body").find('img');
-
-    let index = 0;
-    for (let i = 0; i < imgs.length; i++) {
-      const item = imgs[i];
-      let imgPatch = autoCheckUrl($(item).attr('src'));
-      await new Promise((resolve) => {
-        downloadImage(imgPatch, path.join(__dirname, `../data/sex8/${text.trim()}/cover_${index++}${path.extname(imgPatch)}`), () => {
-          resolve();
-        });
-      });
-    }
+    const text = await $('#thread_subject').text();
+    // const imgs = await $(".pcb").find('img.zoom');
+    const zhongzi = await $(".pcb").find("ignore_js_op").find('a');
     i++;
+    _array.push({
+      'text': text,
+      'page': obj.href,
+      'url': 'https://www.sex8.cc/' + zhongzi.attr('href'),
+    });
+    // await new Promise((resolve) => {
+    //   downloadImage('https://www.sex8.cc/' + zhongzi.attr('href'), path.join(__dirname, `../data/sex8/${text.trim()}/${zhongzi.text().trim()}`), () => {
+    //     resolve();
+    //   });
+    // });
+    // for (let i = 0; i < imgs.length; i++) {
+    //   const item = imgs[i];
+    //   let imgPatch = autoCheckUrl($(item).attr('src'));
+    //   await new Promise((resolve) => {
+    //     downloadImage(imgPatch, path.join(__dirname, `../data/sex8/${text.trim()}/cover_${index++}${path.extname(imgPatch)}`), () => {
+    //       resolve();
+    //     });
+    //   });
+    // }
+  }
+  if (_array.length) {
+    dataArray.concat(_array);
+    // JSON文件写入
+    await new Promise((resolve) => {
+      writeFile(path.join(__dirname, `../data/${pageIndex}.txt`), JSON.stringify(_array), (err) => {
+        log(`---------JSON文件 写入${err ? "失败" : "成功"}---------`);
+        resolve();
+      });
+    });
   }
   log(`==获取数据详情== End... 耗时：${(Date.now() - _start_time) / 1000}秒`);
   getNextPage(page);
-  return datalist;
 }
-
 /**
  * 加载下一页
  */
-async function getNextPage(page){
-
-  await page.goto(currentListPageUrl);
-  await Promise.all([
-    page.waitForNavigation(),
-    page.click(`#pager_top a.p_${++pageIndex}`),
-  ]);
-  currentListPageUrl = page.url();
-  console.error(currentListPageUrl);
+async function getNextPage(page) {
+  console.error(`【开始加载  ${pageIndex}  页】`);
+  await page.goto(`https://www.sex8.cc/forum-70-${pageIndex++}.html`, {
+    timeout: 0
+  });
+  await getDataList(page);
 }
 /**
  * 流程入口
@@ -134,12 +167,13 @@ async function getNextPage(page){
     browser,
     page
   } = await getAmbient();
-  // 2：获取数据列表
-  let dataList = await getDataList(page);
-  // 3：整合列表详情数据
-  dataList = await getDataByDetail(page, dataList);
-  // 7：关闭浏览器
-  browser.close();
-  // 8：关闭子进程
-  process.stdout.write("close");
+  // 登陆
+  await login(page);
+  // 获取数据
+  await getNextPage(page);
+  // await getDataList(page);
+  // // 7：关闭浏览器
+  // browser.close();
+  // // 8：关闭子进程
+  // process.stdout.write("close");
 })();

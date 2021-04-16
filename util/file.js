@@ -4,13 +4,9 @@ const request = require("request");
 
 module.exports = {
   writeFile(path, buffer, callback) {
-    let lastPath = path.substring(0, path.lastIndexOf("/"));
-    fs.mkdir(lastPath, { recursive: true }, (err) => {
+    fs.writeFile(path, buffer, (err) => {
       if (err) return callback(err);
-      fs.writeFile(path, buffer, (err) => {
-        if (err) return callback(err);
-        return callback(null);
-      });
+      return callback(null);
     });
   },
   /**
@@ -20,12 +16,14 @@ module.exports = {
    * @param {*} callback 
    */
   downloadImage(src, dest, callback) {
-    const path = dest.substring(0, dest.lastIndexOf('/'));
-    if(!fs.existsSync(path)){
-      mkdirSync(path);
+    if (!fs.existsSync(dest)) {
+      mkdirSync(dest);
     }
     request.head(src, (err, res, body) => {
-      if (err) { console.log(err); return }
+      if (err) {
+        console.log(err);
+        return
+      }
       src && request(src).pipe(fs.createWriteStream(dest)).on('close', () => {
         callback && callback(null, dest)
       });
@@ -34,14 +32,14 @@ module.exports = {
 };
 
 //递归创建目录 同步方法  
-function mkdirSync(dirname) {  
+function mkdirSync(dirname) {
   //console.log(dirname);  
-  if (fs.existsSync(dirname)) {  
-      return true;  
-  } else {  
-      if (mkdirSync(path.dirname(dirname))) {  
-          fs.mkdirSync(dirname);  
-          return true;  
-      }  
-  }  
+  if (fs.existsSync(dirname)) {
+    return true;
+  } else {
+    if (mkdirSync(path.dirname(dirname))) {
+      fs.mkdirSync(dirname);
+      return true;
+    }
+  }
 }
