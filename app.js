@@ -3,16 +3,24 @@ const cronJob = require("cron").CronJob;
 const path = require("path");
 const config = require("./config");
 const uLog = require("./util/log.js");
-const { frequency } = config.crawlerServer.live;
+const args = require('minimist')(process.argv.slice(2));
+const crawlerServer = config.crawlerServer;
+
+const {
+  target,
+  deep
+} = args;
 
 let i = 0;
 let free = null;
+
 function run() {
+  
   if (free) {
     return;
   }
 
-  free = child_process.exec(`node ${[path.resolve(__dirname, "task.js")]}`);
+  free = child_process.exec(`node ${[path.resolve(__dirname, `modules/${target}.js`)]}`);
   uLog.info(`子进程PID：${free.pid}已启动，开始执行第${++i}次定时任务...`);
 
   free.stdout.on("data", (data) => {
@@ -40,5 +48,7 @@ function run() {
  * Start [可选]指定是否在退出构造函数之前启动作业，默认情况下，此值设置为false。
  * timeZone [可选] -指定执行的时区。这将修改相对于您的时区的实际时间 ，不设置为当前所在时区。设置为Europe/London 为UTC 0时区
  */
-new cronJob(frequency, run, null, true);
+deep && new cronJob(crawlerServer[target].frequency, run, null, true);
+
+// 首次启动
 run();

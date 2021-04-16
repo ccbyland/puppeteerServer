@@ -2,7 +2,10 @@
   "name": "puppeteer-test",
   "version": "0.1.0",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "dev:sex8": "node app.js --target=sex8",
+    "dev:live": "node app.js --target=live --deep=true"
+  },
   "dependencies": {
     "async": "^3.2.0",
     "cheerio": "^1.0.0-rc.3",
@@ -10,5 +13,8 @@
     "cron": "^1.8.2",
     "mongoose": "^5.10.14",
     "puppeteer": "^5.4.1"
+  },
+  "devDependencies": {
+    "minimist": "^1.2.5"
   }
 }
