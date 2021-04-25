@@ -57,12 +57,21 @@ async function login(page) {
   const _start_time = Date.now();
   log(`==准备登陆== Start...`);
   //登录
+  await closePopup(page);
   await page.type('#ls_username', "cc_byland");
   await page.type('#ls_password', 'byland99');
-  await page.click('a.close_index');
+  await closePopup(page);
   await page.click('.fastlg_l button');
   await page.waitForNavigation();
   log(`==登陆成功== End... 耗时：${(Date.now() - _start_time) / 1000}秒`);
+}
+async function closePopup(page){
+  const content = await page.content();
+  const $ = cheerio.load(content);
+  const close_index = await $("a.close_index");
+  if(close_index.length){
+    await page.click('a.close_index');
+  }
 }
 /**
  * 获取数据列表

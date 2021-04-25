@@ -6,7 +6,7 @@ module.exports = {
   crawlerServer: {
     sex8: {
       // 是否显示chrome可视化窗口
-      isHeadless: false,
+      isHeadless: true,
       // 过滤关键字
       filterTags: ['葵伊吹', '明里', '森日'],
       // 目标一级页面
