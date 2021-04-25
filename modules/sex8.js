@@ -148,7 +148,7 @@ async function getDataByDetail(page, list) {
     dataArray.concat(_array);
     // JSON文件写入
     await new Promise((resolve) => {
-      writeFile(path.join(__dirname, `../data/${pageIndex}.txt`), JSON.stringify(_array), (err) => {
+      writeFile(path.join(__dirname, `../data/${pageIndex}.txt`), JSON.stringify(_array).split(',').join('\r\n'), (err) => {
         log(`---------JSON文件 写入${err ? "失败" : "成功"}---------`);
         resolve();
       });
