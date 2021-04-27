@@ -29,17 +29,17 @@ let pageIndex = 1;
  * 创建浏览器和页面对象环境
  */
 async function getAmbient() {
+  const width = 1024;
+  const height = 1600;
   const _start_time = Date.now();
   log(`==创建浏览器和页面对象环境== Start...`);
   const browser = await puppeteer.launch({
     devtools: false, //是否显示调试工具
     headless: !isHeadless, // 是否显示chrome可视化窗口
-    defaultViewport: {
-      width: 2000,
-      height: 800,
-    },
+    'defaultViewport' : { 'width' : width, 'height' : height }
   });
   const page = await browser.newPage();
+  await page.setViewport( { 'width' : width, 'height' : height } );
   await page.goto(currentListPageUrl, {
     timeout: 0
   });

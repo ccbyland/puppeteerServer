@@ -6,9 +6,9 @@ module.exports = {
   crawlerServer: {
     sex8: {
       // 是否显示chrome可视化窗口
-      isHeadless: true,
+      isHeadless: false,
       // 过滤关键字
-      filterTags: ['市来', '桃乃', '明里', '森日'],
+      filterTags: ['乙都咲乃', '桃乃', '市来'],
       // 目标一级页面
       url: "https://www.sex8.cc/forum-70-1.html"
     },
