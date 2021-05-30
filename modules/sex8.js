@@ -60,8 +60,10 @@ async function login(page) {
   await closePopup(page);
   await page.type('#ls_username', "cc_byland");
   await page.type('#ls_password', 'byland99');
-  await closePopup(page);
-  await page.click('.fastlg_l button');
+  // await closePopup(page);
+  // await page.click('.fastlg_l button');
+  //按住键盘enter
+  await page.keyboard.down('Enter');
   await page.waitForNavigation();
   log(`==登陆成功== End... 耗时：${(Date.now() - _start_time) / 1000}秒`);
 }
