@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev:sex8": "node app.js --target=sex8",
     "dev:live": "node app.js --target=live --deep=true"
   },
   "dependencies": {

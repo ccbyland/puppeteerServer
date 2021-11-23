@@ -4,14 +4,6 @@ module.exports = {
 
   // 爬虫服务
   crawlerServer: {
-    sex8: {
-      // 是否显示chrome可视化窗口
-      isHeadless: false,
-      // 过滤关键字
-      filterTags: ['桃乃', '市来', '明里', '妹妹', '女儿', '交换', '偷窥', '蒙眼', '透明'],
-      // 目标一级页面
-      url: "https://www.sex8.cc/forum-70-1.html"
-    },
     live: {
       // 是否显示chrome可视化窗口
       isHeadless: true,
