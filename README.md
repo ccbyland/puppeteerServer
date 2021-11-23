@@ -21,7 +21,7 @@
 * 【fs，mongoose】- 数据存储
 
 #### 流程示意图
-![image](./01.png)
+![image](./docs/01.png)
 
 
 #### 效果预览
